@@ -5,10 +5,13 @@ import {z} from 'zod'
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form"
 import { zodResolver } from '@hookform/resolvers/zod'
 import {signIn} from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 
 
 const SignInForm = () => {
+
+    const router = useRouter()
 
     const formSchema = z.object({
       
@@ -32,9 +35,24 @@ const SignInForm = () => {
             email: ''  
         }
       })
-      const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+
+      const email = watch('email');
+      const password = watch('password')
+      const onSubmit= async (data : z.infer<typeof formSchema>) => {
         console.log(data)
-        const signInData = await signIn('')
+        const signInData = await signIn('credentials',{
+            email:data?.email,
+            password: data?.password,
+            redirect: false
+        })
+
+        if(signInData?.error) {
+            console.log(signInData?.error)
+        } else {
+            router.refresh()
+            console.log('okey')
+            router.push('/admin')
+        }
       }
   
   return (
